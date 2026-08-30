@@ -1,0 +1,45 @@
+# Musée Bolo — thème GRUB
+# Conçu pour fonctionner avec plusieurs résolutions.
+# Le fond reste blanc et le logo est centré, sans étirement.
+
+desktop-color: "#ffffff"
+title-text: ""
+
+# Logo central
++ image {
+    file = "logo.png"
+    left = 50%-210
+    top = 50%-260
+    width = 420
+    height = 420
+}
+
+# Menu de démarrage, volontairement discret.
++ boot_menu {
+    left = 20%
+    top = 72%
+    width = 60%
+    height = 18%
+
+    item_font = "Unifont Regular 16"
+    item_color = "#555555"
+    selected_item_color = "#0093c4"
+
+    item_height = 28
+    item_padding = 4
+    item_spacing = 2
+
+    selected_item_pixmap_style = ""
+}
+
+# Compte à rebours
++ label {
+    id = "__timeout__"
+    left = 0
+    top = 94%
+    width = 100%
+    align = "center"
+    color = "#777777"
+    font = "Unifont Regular 14"
+    text = "Démarrage automatique dans %d s"
+}
