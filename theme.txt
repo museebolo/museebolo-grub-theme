@@ -2,7 +2,7 @@
 # Conçu pour fonctionner avec plusieurs résolutions.
 # Le fond reste blanc et le logo est centré, sans étirement.
 
-desktop-color: "#ffffff"
+desktop-color: "#000000"
 title-text: ""
 
 # Logo central
