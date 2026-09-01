@@ -1,24 +1,14 @@
-#!/bin/sh
-set -eu
+#!/bin/bash
 
-THEME_DIR="/boot/grub/themes/museebolo"
+set -euo pipefail
 
-if [ "$(id -u)" -ne 0 ]; then
-    echo "Exécutez ce script avec sudo."
-    exit 1
-fi
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-mkdir -p "$THEME_DIR"
-cp "$(dirname "$0")/theme.txt" "$THEME_DIR/"
-cp "$(dirname "$0")/logo.png" "$THEME_DIR/"
+echo "=== Musée Bolo — personnalisation de la borne ==="
 
-echo "Thème copié dans $THEME_DIR"
+"${DIR}/grub/install.sh"
+"${DIR}/plymouth/install.sh"
+"${DIR}/lightdm/install.sh"
+
 echo
-echo "Ajoutez dans /etc/default/grub :"
-echo 'GRUB_THEME="/boot/grub/themes/museebolo/theme.txt"'
-echo 'GRUB_GFXMODE=auto'
-echo 'GRUB_GFXPAYLOAD_LINUX=keep'
-echo 'GRUB_TIMEOUT_STYLE=menu'
-echo 'GRUB_TIMEOUT=3'
-echo
-echo "Puis exécutez : sudo update-grub"
+echo "Personnalisation terminée."
