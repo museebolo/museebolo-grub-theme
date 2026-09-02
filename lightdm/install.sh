@@ -16,6 +16,11 @@ GREETER_CONFIG_DST="/etc/lightdm/lightdm-gtk-greeter.conf"
 
 AUTOLOGIN_CONFIG="/etc/lightdm/lightdm.conf.d/50-museebolo-autologin.conf"
 
+OPENBOX_DIR="/home/${USER_NAME}/.config/openbox"
+OPENBOX_AUTOSTART="${OPENBOX_DIR}/autostart"
+
+# Vérifications
+
 if [[ $EUID -ne 0 ]]; then
     echo "Erreur : ce script doit être exécuté avec sudo."
     echo "Usage : sudo ./install.sh"
@@ -43,7 +48,9 @@ if [[ ! -f "${GREETER_CONFIG_SRC}" ]]; then
     exit 1
 fi
 
-echo "[1/5] Vérification de l'utilisateur museebolo..."
+# 1. Création de l'utilisateur
+
+echo "[1/8] Vérification de l'utilisateur museebolo..."
 
 if id "${USER_NAME}" >/dev/null 2>&1; then
     echo "L'utilisateur '${USER_NAME}' existe déjà."
@@ -57,21 +64,54 @@ else
         "${USER_NAME}"
 
     # Pas de mot de passe pour ce compte de borne.
-    passwd --delete "${USER_NAME}"
+    passwd --lock "${USER_NAME}"
+    #passwd --delete "${USER_NAME}"
 
     echo "Utilisateur '${USER_NAME}' créé."
 fi
 
+# 2. Installation d'Openbox
+
 echo
-echo "[2/5] Installation du fond LightDM..."
+echo "[2/8] Installation d'Openbox..."
+
+if dpkg-query -W -f='${Status}' openbox 2>/dev/null \
+	| grep -q "install ok installed"; then
+	
+	echo "Openbox est déjà installé."
+
+else
+	apt-get update
+	DEBIAN_FRONTEND=noninteractive apt-get install -y openbox
+
+fi
+
+# 3. Vérification de la session Openbox
+
+echo
+echo "[3/8] Vérification de la session Openbox..."
+
+if [[ ! -f /usr/share/xsessions/openbox.desktop ]]; then
+	echo "Erreur : /usr/share/xsessions/openbox.desktop introuvable."
+	exit 1
+fi
+
+echo "Session Openbox disponible."
+
+# 4. Fond lightdm
+
+echo
+echo "[4/8] Installation du fond LightDM..."
 
 mkdir -p "${BACKGROUND_DIR}"
 chmod 0755 "${BACKGROUND_DIR}"
 
 install -m 0644 "${BACKGROUND_SRC}" "${BACKGROUND_DST}"
 
+# 5. Greeter
+
 echo
-echo "[3/5] Installation de la configuration du greeter..."
+echo "[5/8] Installation de la configuration du greeter..."
 
 if [[ -f "${GREETER_CONFIG_DST}" && ! -f "${GREETER_CONFIG_DST}.museebolo.bak" ]]; then
     cp -a "${GREETER_CONFIG_DST}" "${GREETER_CONFIG_DST}.museebolo.bak"
@@ -79,8 +119,10 @@ fi
 
 install -m 0644 "${GREETER_CONFIG_SRC}" "${GREETER_CONFIG_DST}"
 
+# 6. Autologin
+
 echo
-echo "[4/5] Configuration de l'autologin..."
+echo "[6/8] Configuration de l'autologin..."
 
 mkdir -p /etc/lightdm/lightdm.conf.d
 
@@ -88,16 +130,45 @@ cat > "${AUTOLOGIN_CONFIG}" <<EOF
 [Seat:*]
 autologin-user=${USER_NAME}
 autologin-user-timeout=${AUTOLOGIN_TIMEOUT}
+user-sessions=openbox
 EOF
 
 chmod 0644 "${AUTOLOGIN_CONFIG}"
 
+# 7. Configuration Openbox
+
 echo
-echo "[5/5] Vérification..."
+echo "[7/8] Configuration d'Openbox..."
+
+mkdir -p "${OPENBOX_DIR}"
+
+cat > "${OPENBOX_AUTOSTART}" <<EOF
+#!/bin/sh
+
+# Désactiver l'économiseur d'écran X
+xset s off
+
+# Désactiver le DPMS
+xset -dpms
+
+# Empêcher le blanking de l'éacrn
+xset s noblank
+EOF
+
+chmod 0755 "${OPENBOX_AUTOSTART}"
+
+chown -R "${USER_NAME}:${USER_NAME}" "/home/${USER_NAME}/.config"
+
+
+echo
+echo "[8/8] Vérification..."
 
 echo
 echo "Utilisateur :"
 id "${USER_NAME}"
+
+echo
+echo "Sessions : Openbox"
 
 echo
 echo "Configuration du greeter :"
