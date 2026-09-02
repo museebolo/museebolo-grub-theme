@@ -130,7 +130,7 @@ cat > "${AUTOLOGIN_CONFIG}" <<EOF
 [Seat:*]
 autologin-user=${USER_NAME}
 autologin-user-timeout=${AUTOLOGIN_TIMEOUT}
-user-sessions=openbox
+user-session=openbox
 EOF
 
 chmod 0644 "${AUTOLOGIN_CONFIG}"
