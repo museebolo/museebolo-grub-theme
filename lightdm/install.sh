@@ -16,8 +16,6 @@ GREETER_CONFIG_DST="/etc/lightdm/lightdm-gtk-greeter.conf"
 
 AUTOLOGIN_CONFIG="/etc/lightdm/lightdm.conf.d/50-museebolo-autologin.conf"
 
-DMRC="/home/${USER_NAME}/.dmrc"
-
 OPENBOX_DIR="/home/${USER_NAME}/.config/openbox"
 OPENBOX_AUTOSTART="${OPENBOX_DIR}/autostart"
 
@@ -132,19 +130,10 @@ cat > "${AUTOLOGIN_CONFIG}" <<EOF
 [Seat:*]
 autologin-user=${USER_NAME}
 autologin-user-timeout=${AUTOLOGIN_TIMEOUT}
-user-session=openbox
+autologin-session=openbox
 EOF
 
 chmod 0644 "${AUTOLOGIN_CONFIG}"
-
-# 
-cat > "${DMRC}" <<EOF
-[Desktop]
-Session=openbox
-EOF
-
-chown "${USER_NAME}:${USER_NAME}" "${DMRC}"
-chmod 0644 "${DMRC}"
 
 # 7. Configuration Openbox
 
