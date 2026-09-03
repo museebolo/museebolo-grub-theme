@@ -159,6 +159,12 @@ chmod 0755 "${OPENBOX_AUTOSTART}"
 
 chown -R "${USER_NAME}:${USER_NAME}" "/home/${USER_NAME}/.config"
 
+install \
+    -o "${USER_NAME}" \
+    -g "${USER_NAME}" \
+    -m 0644 \
+    "${SCRIPT_DIR}/openbox/rc.xml" \
+    "${OPENBOX_DIR}/rc.xml"
 
 echo
 echo "[8/8] Vérification..."
