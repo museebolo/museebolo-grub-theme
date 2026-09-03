@@ -4,6 +4,7 @@ set -euo pipefail
 
 USER_NAME="museebolo"
 AUTOLOGIN_TIMEOUT=5
+AUDIO_VOLUME=70
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -148,14 +149,15 @@ mkdir -p "${OPENBOX_DIR}"
 cat > "${OPENBOX_AUTOSTART}" <<EOF
 #!/bin/sh
 
-# Désactiver l'économiseur d'écran X
+# Disable screen blanking and DPMS
 xset s off
-
-# Désactiver le DPMS
 xset -dpms
-
-# Empêcher le blanking de l'éacrn
 xset s noblank
+
+# Set audio volume
+wpctl set-mute @DEFAULT_AUDIO_SINK@ 0
+wpctl set-volume @DEFAULT_AUDIO_SINK@ ${AUDIO_VOLUME}%
+
 EOF
 
 chmod 0755 "${OPENBOX_AUTOSTART}"
