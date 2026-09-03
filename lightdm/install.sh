@@ -19,6 +19,9 @@ AUTOLOGIN_CONFIG="/etc/lightdm/lightdm.conf.d/50-museebolo-autologin.conf"
 OPENBOX_DIR="/home/${USER_NAME}/.config/openbox"
 OPENBOX_AUTOSTART="${OPENBOX_DIR}/autostart"
 
+XORG_CONFIG_DIR="/etc/X11/xorg.conf.d"
+XORG_KIOSK_CONFIG="${XORG_CONFIG_DIR}/10-museebolo-kiosk.conf"
+
 # Vérifications
 
 if [[ $EUID -ne 0 ]]; then
@@ -50,7 +53,7 @@ fi
 
 # 1. Création de l'utilisateur
 
-echo "[1/8] Vérification de l'utilisateur museebolo..."
+echo "[1/9] Vérification de l'utilisateur museebolo..."
 
 if id "${USER_NAME}" >/dev/null 2>&1; then
     echo "L'utilisateur '${USER_NAME}' existe déjà."
@@ -73,7 +76,7 @@ fi
 # 2. Installation d'Openbox
 
 echo
-echo "[2/8] Installation d'Openbox..."
+echo "[2/9] Installation d'Openbox..."
 
 if dpkg-query -W -f='${Status}' openbox 2>/dev/null \
 	| grep -q "install ok installed"; then
@@ -89,7 +92,7 @@ fi
 # 3. Vérification de la session Openbox
 
 echo
-echo "[3/8] Vérification de la session Openbox..."
+echo "[3/9] Vérification de la session Openbox..."
 
 if [[ ! -f /usr/share/xsessions/openbox.desktop ]]; then
 	echo "Erreur : /usr/share/xsessions/openbox.desktop introuvable."
@@ -101,7 +104,7 @@ echo "Session Openbox disponible."
 # 4. Fond lightdm
 
 echo
-echo "[4/8] Installation du fond LightDM..."
+echo "[4/9] Installation du fond LightDM..."
 
 mkdir -p "${BACKGROUND_DIR}"
 chmod 0755 "${BACKGROUND_DIR}"
@@ -111,7 +114,7 @@ install -m 0644 "${BACKGROUND_SRC}" "${BACKGROUND_DST}"
 # 5. Greeter
 
 echo
-echo "[5/8] Installation de la configuration du greeter..."
+echo "[5/9] Installation de la configuration du greeter..."
 
 if [[ -f "${GREETER_CONFIG_DST}" && ! -f "${GREETER_CONFIG_DST}.museebolo.bak" ]]; then
     cp -a "${GREETER_CONFIG_DST}" "${GREETER_CONFIG_DST}.museebolo.bak"
@@ -122,7 +125,7 @@ install -m 0644 "${GREETER_CONFIG_SRC}" "${GREETER_CONFIG_DST}"
 # 6. Autologin
 
 echo
-echo "[6/8] Configuration de l'autologin..."
+echo "[6/9] Configuration de l'autologin..."
 
 mkdir -p /etc/lightdm/lightdm.conf.d
 
@@ -138,7 +141,7 @@ chmod 0644 "${AUTOLOGIN_CONFIG}"
 # 7. Configuration Openbox
 
 echo
-echo "[7/8] Configuration d'Openbox..."
+echo "[7/9] Configuration d'Openbox..."
 
 mkdir -p "${OPENBOX_DIR}"
 
@@ -166,8 +169,24 @@ install \
     "${SCRIPT_DIR}/rc.xml" \
     "${OPENBOX_DIR}/rc.xml"
 
+
 echo
-echo "[8/8] Vérification..."
+echo "[8/9] Désactivation du changement de console virtuelle..."
+
+mkdir -p "${XORG_CONFIG_DIR}"
+
+cat > "${XORG_KIOSK_CONFIG}" <<'EOF'
+# Musée Bolo kiosk configuration
+
+Section "ServerFlags"
+    Option "DontVTSwitch" "true"
+EndSection
+EOF
+
+chmod 0644 "${XORG_KIOSK_CONFIG}"
+
+echo
+echo "[9/9] Vérification..."
 
 echo
 echo "Utilisateur :"
