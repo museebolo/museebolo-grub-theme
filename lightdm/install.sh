@@ -163,7 +163,7 @@ install \
     -o "${USER_NAME}" \
     -g "${USER_NAME}" \
     -m 0644 \
-    "${SCRIPT_DIR}/openbox/rc.xml" \
+    "${SCRIPT_DIR}/rc.xml" \
     "${OPENBOX_DIR}/rc.xml"
 
 echo
