@@ -8,7 +8,8 @@ THEME_DST="/boot/grub/themes/${THEME_NAME}"
 
 GRUB_DEFAULT="/etc/default/grub"
 GRUB_CUSTOM="/etc/grub.d/40_custom" 
-GRUB_UNRESTRICTED="/etc/grub.d/09_museebolo_unrestricted"
+GRUB_LINUX="/etc/grub.d/10_linux"
+#GRUB_UNRESTRICTED="/etc/grub.d/09_museebolo_unrestricted"
 
 GRUB_USER="museebolo"
 
@@ -78,6 +79,7 @@ echo "[3/5] Configuration du mot de passe GRUB..."
 #
 if [[ ! -e "${GRUB_CUSTOM}.museebolo.bak" ]]; then
 	cp -a "${GRUB_CUSTOM}" "${GRUB_CUSTOM}.museebolo.bak"
+	chmod -x "${GRUB_CUSTOM}.museebolo.bak"
 fi
 
 #
@@ -119,26 +121,31 @@ echo
 echo "[4/5] Autorisation du démarrage normal sans mot de passe..."
 
 #
-# Sans --unrestricted, la présence de "superusers" impose
-# une authentification avant le démarrage d'une entrée.
+# Sauvegarde initiale de 10_linux
 #
-# Nous voulons :
-#
-#  démarrage normal      : sans mot de passe
-#  modification avec 'e' : mot de passe
-#  console GRUB avec 'c' : mot de passe
-#
-# Le script est exécuté avant 10_linux et ajoute --unrestricted
-# aux options utilisées pour générer les entrées Debian.
-#
+if [[ ! -e "${GRUB_LINUX}.museebolo.bak" ]]; then
+    cp -a "${GRUB_LINUX}" "${GRUB_LINUX}.museebolo.bak"
+    chmod -x "${GRUB_LINUX}.museebolo.bak"
+fi
 
-cat > "${GRUB_UNRESTRICTED}" <<'EOF'
-#!/bin/sh
+#
+# Supprime un ancien patch éventuel.
+#
+sed -i 's/ --unrestricted//g' "${GRUB_LINUX}"
 
-echo 'menuentry_id_option="--unrestricted $menuentry_id_option"'
-EOF
-
-chmod 755 "${GRUB_UNRESTRICTED}"
+#
+# Ajoute --unrestricted uniquement à l'entrée principale Debian.
+#
+# On cible l'entrée "gnulinux-simple" afin de ne pas ouvrir :
+#   - Advanced options
+#   - Recovery mode
+#   - UEFI Firmware Settings
+#
+sed -i \
+    "/menuentry .*gnulinux-simple/ {
+        /--unrestricted/! s/ \\\$menuentry_id_option/ --unrestricted \\\$menuentry_id_option/
+    }" \
+    "${GRUB_LINUX}"
 
 echo
 echo "[5/5] Génération de grub.cfg..."
@@ -165,13 +172,13 @@ if ! grep -q '^password_pbkdf2 ' /boot/grub/grub.cfg; then
     exit 1
 fi
 
-if ! grep -q '^menuentry .*--unrestricted' /boot/grub/grub.cfg; then
-    echo "ERREUR : aucune entrée --unrestricted trouvée."
-    echo
-    echo "Entrées GRUB générées :"
-    grep -E '^menuentry |^submenu ' /boot/grub/grub.cfg || true
-    echo
-    echo "Vérifiez /boot/grub/grub.cfg avant de redémarrer."
+if ! grep -q "^menuentry 'Debian GNU/Linux'.*--unrestricted" /boot/grub/grub.cfg; then
+    echo "ERREUR : l'entrée Debian principale n'est pas unrestricted."
+    exit 1
+fi
+
+if grep -q "recovery.*--unrestricted" /boot/grub/grub.cfg; then
+    echo "ERREUR : une entrée recovery est unrestricted."
     exit 1
 fi
 
@@ -179,8 +186,12 @@ fi
 echo
 echo "Configuration GRUB Musée Bolo installée."
 echo
-echo "Thème : ${THEME_NAME}"
+echo "Thème            : ${THEME_NAME}"
 echo "Utilisateur GRUB : ${GRUB_USER}"
 echo
-echo "Le démarrage normal reste accessible sans mot de passe."
-echo "L'édition des entrées GRUB et la console sont protégées."
+echo "Debian normal     : sans mot de passe"
+echo "Advanced options  : protégé"
+echo "Recovery mode     : protégé"
+echo "UEFI firmware     : protégé"
+echo "Édition avec 'e'  : protégée"
+echo "Console avec 'c'  : protégée"
