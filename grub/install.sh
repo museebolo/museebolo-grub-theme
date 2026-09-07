@@ -9,7 +9,6 @@ THEME_DST="/boot/grub/themes/${THEME_NAME}"
 GRUB_DEFAULT="/etc/default/grub"
 GRUB_CUSTOM="/etc/grub.d/40_custom" 
 GRUB_LINUX="/etc/grub.d/10_linux"
-#GRUB_UNRESTRICTED="/etc/grub.d/09_museebolo_unrestricted"
 
 GRUB_USER="museebolo"
 
@@ -129,23 +128,24 @@ if [[ ! -e "${GRUB_LINUX}.museebolo.bak" ]]; then
 fi
 
 #
-# Supprime un ancien patch éventuel.
-#
-sed -i 's/ --unrestricted//g' "${GRUB_LINUX}"
-
-#
 # Ajoute --unrestricted uniquement à l'entrée principale Debian.
 #
-# On cible l'entrée "gnulinux-simple" afin de ne pas ouvrir :
-#   - Advanced options
-#   - Recovery mode
-#   - UEFI Firmware Settings
-#
 sed -i \
-    "/menuentry .*gnulinux-simple/ {
-        /--unrestricted/! s/ \\\$menuentry_id_option/ --unrestricted \\\$menuentry_id_option/
+    "/gnulinux-simple-\\\$boot_device_id/ {
+        s/\${CLASS} \\\\\$menuentry_id_option/\${CLASS} --unrestricted \\\\\$menuentry_id_option/
     }" \
     "${GRUB_LINUX}"
+
+#
+# Vérifie que le patch a réellement été appliqué.
+#
+if ! grep 'gnulinux-simple' "${GRUB_LINUX}" | grep -q -- '--unrestricted'; then
+    echo "ERREUR : impossible de modifier l'entrée Debian principale dans 10_linux."
+    echo
+    echo "Ligne concernée :"
+    grep -n 'gnulinux-simple' "${GRUB_LINUX}" || true
+    exit 1
+fi
 
 echo
 echo "[5/5] Génération de grub.cfg..."
