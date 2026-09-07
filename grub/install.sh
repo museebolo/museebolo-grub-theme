@@ -78,8 +78,9 @@ echo "[3/5] Configuration du mot de passe GRUB..."
 #
 if [[ ! -e "${GRUB_CUSTOM}.museebolo.bak" ]]; then
 	cp -a "${GRUB_CUSTOM}" "${GRUB_CUSTOM}.museebolo.bak"
-	chmod -x "${GRUB_CUSTOM}.museebolo.bak"
 fi
+
+chmod -x "${GRUB_CUSTOM}.museebolo.bak"
 
 #
 # Ne demande  le mot de passe que si aucune configuration Musée Bolo
@@ -124,8 +125,9 @@ echo "[4/5] Autorisation du démarrage normal sans mot de passe..."
 #
 if [[ ! -e "${GRUB_LINUX}.museebolo.bak" ]]; then
     cp -a "${GRUB_LINUX}" "${GRUB_LINUX}.museebolo.bak"
-    chmod -x "${GRUB_LINUX}.museebolo.bak"
 fi
+
+chmod -x "${GRUB_LINUX}.museebolo.bak"
 
 #
 # Ajoute --unrestricted uniquement à l'entrée principale Debian.
