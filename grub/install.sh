@@ -93,7 +93,8 @@ if ! grep -q '^# BEGIN Musée Bolo GRUB authentication$' "${GRUB_CUSTOM}"; then
 	
 	GRUB_PASSWORD_HASH="$(
 		grub-mkpasswd-pbkdf2 \
-		| sed -n 's/^PBKDF2 hash of your password is //p'
+		| grep -o 'grub\.pdkdf2\.[^[:space:]]*' \
+		| tail -n 1
 	)"
 	
 	if [[ -z "${GRUB_PASSWORD_HASH}" ]]; then
