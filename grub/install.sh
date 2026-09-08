@@ -70,6 +70,10 @@ set_grub_option \
 	GRUB_COLOR_HIGHLIGHT \
 	"white/black"
 
+set_grub_option \
+    GRUB_CMDLINE_LINUX_DEFAULT \
+    "quiet splash loglevel=3 systemd.show_status=false rd.systemd.show_status=false vt.global_cursor_default=0"
+
 echo
 echo "[3/5] Configuration du mot de passe GRUB..."
 
