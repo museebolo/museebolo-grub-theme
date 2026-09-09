@@ -31,6 +31,8 @@ Description=Musée Bolo automatic poweroff timer
 
 [Timer]
 OnCalendar=*-*-* 00:30:00
+RandomizeDelaySec=30min
+FixedRandomDelay=no
 Persistent=false
 
 [Install]
