@@ -4,7 +4,6 @@ set -euo pipefail
 
 USER_NAME="museebolo"
 AUTOLOGIN_TIMEOUT=5
-AUDIO_VOLUME=70
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -153,11 +152,6 @@ cat > "${OPENBOX_AUTOSTART}" <<EOF
 xset s off
 xset -dpms
 xset s noblank
-
-# Set audio volume
-wpctl set-mute @DEFAULT_AUDIO_SINK@ 0
-wpctl set-volume @DEFAULT_AUDIO_SINK@ ${AUDIO_VOLUME}%
-
 EOF
 
 chmod 0755 "${OPENBOX_AUTOSTART}"
